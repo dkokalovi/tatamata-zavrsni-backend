@@ -1,14 +1,13 @@
 import express from "express";
 import Interest from "../models/Interest.js";
 import Analysis from "../models/Analysis.js";
-import auth from "../middleware/auth.js";
+import auth, { requireAdmin } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import validate from "../middleware/validate.js";
 import { createInterestValidation } from "../validators/interestValidators.js";
 
 const router = express.Router();
 
-// Korisnik oznacava da ga zanima kontakt s odredenom preporucenom firmom
 router.post(
   "/",
   auth,
@@ -33,7 +32,6 @@ router.post(
   })
 );
 
-// Povijest interesa prijavljenog korisnika
 router.get(
   "/",
   auth,
@@ -43,6 +41,28 @@ router.get(
       .populate("analysis")
       .sort({ createdAt: -1 });
     res.json(interests);
+  })
+);
+
+router.patch(
+  "/:id",
+  auth,
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const { status } = req.body;
+    const DOZVOLJENI_STATUSI = ["na_cekanju", "kontaktirano", "zavrseno"];
+    if (!DOZVOLJENI_STATUSI.includes(status)) {
+      return res.status(400).json({ message: "Neispravan status." });
+    }
+
+    const interest = await Interest.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true, runValidators: true }
+    );
+    if (!interest) return res.status(404).json({ message: "Interes ne postoji." });
+
+    res.json(interest);
   })
 );
 

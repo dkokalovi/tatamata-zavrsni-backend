@@ -5,6 +5,7 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 import Analysis from "../models/Analysis.js";
 import Company from "../models/Company.js";
+import Interest from "../models/Interest.js";
 import auth from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import validate from "../middleware/validate.js";
@@ -22,7 +23,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 8 * 1024 * 1024 }, // 8MB
+  limits: { fileSize: 8 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (!file.mimetype.startsWith("image/")) {
       return cb(new Error("Dozvoljene su samo slike."));
@@ -33,7 +34,6 @@ const upload = multer({
 
 const router = express.Router();
 
-// Upload fotografije + AI analiza + preporuka firmi, sve u jednom pozivu.
 router.post(
   "/",
   auth,
@@ -54,7 +54,6 @@ router.post(
       return res.status(502).json({ message: "AI servis trenutno nije dostupan. Pokusaj ponovno." });
     }
 
-    // Pronadi do 3 firme koje rade u prepoznatoj kategoriji problema
     let companies = await Company.find({ kategorije: aiResult.kategorija }).limit(3);
     if (companies.length === 0) {
       companies = await Company.find({ kategorije: "ostalo" }).limit(3);
@@ -80,7 +79,6 @@ router.post(
   })
 );
 
-// Povijest analiza prijavljenog korisnika (najnovije prve)
 router.get(
   "/",
   auth,
@@ -104,6 +102,28 @@ router.get(
       return res.status(403).json({ message: "Nemate pristup ovoj analizi." });
     }
     res.json(analysis);
+  })
+);
+
+router.delete(
+  "/:id",
+  auth,
+  analysisIdValidation,
+  validate,
+  asyncHandler(async (req, res) => {
+    const analysis = await Analysis.findById(req.params.id);
+    if (!analysis) return res.status(404).json({ message: "Analiza ne postoji." });
+    if (analysis.user.toString() !== req.userId) {
+      return res.status(403).json({ message: "Nemate pravo obrisati ovu analizu." });
+    }
+
+    const filePath = path.join(UPLOAD_DIR, path.basename(analysis.slika));
+    fs.unlink(filePath, () => {});
+
+    await Interest.deleteMany({ analysis: analysis._id });
+    await analysis.deleteOne();
+
+    res.json({ message: "Analiza obrisana." });
   })
 );
 
