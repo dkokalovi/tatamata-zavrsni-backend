@@ -2,9 +2,11 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import auth from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import validate from "../middleware/validate.js";
 import { registerValidation, loginValidation } from "../validators/authValidators.js";
+import { updateProfileValidation, changePasswordValidation } from "../validators/profileValidators.js";
 
 const router = express.Router();
 
@@ -37,14 +39,8 @@ router.post(
     }
 
     const hashed = await bcrypt.hash(password, 10);
-    // Rola "admin" se namjerno ne moze postaviti kroz javnu registraciju -
-    // admin korisnike postavlja se rucno u bazi.
     const user = await User.create({
-      ime,
-      prezime,
-      email,
-      telefon,
-      adresa,
+      ime, prezime, email, telefon, adresa,
       password: hashed,
       role: "client",
     });
@@ -77,8 +73,6 @@ router.post(
 router.get(
   "/me",
   asyncHandler(async (req, res) => {
-    // koristi se od strane frontenda da provjeri je li token jos validan
-    // (posebna ruta, ne treba middleware jer namjerno vraca user:null bez greske)
     const header = req.headers.authorization || "";
     const token = header.startsWith("Bearer ") ? header.slice(7) : null;
     if (!token) return res.json({ user: null });
@@ -89,6 +83,45 @@ router.get(
     } catch {
       res.json({ user: null });
     }
+  })
+);
+
+router.patch(
+  "/me",
+  auth,
+  updateProfileValidation,
+  validate,
+  asyncHandler(async (req, res) => {
+    const { ime, prezime, telefon, adresa } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.userId,
+      { ime, prezime, telefon, adresa },
+      { new: true, runValidators: true }
+    );
+    if (!user) return res.status(404).json({ message: "Korisnik ne postoji." });
+    res.json({ user: publicUser(user) });
+  })
+);
+
+router.patch(
+  "/me/lozinka",
+  auth,
+  changePasswordValidation,
+  validate,
+  asyncHandler(async (req, res) => {
+    const { trenutnaLozinka, novaLozinka } = req.body;
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ message: "Korisnik ne postoji." });
+
+    const match = await bcrypt.compare(trenutnaLozinka, user.password);
+    if (!match) {
+      return res.status(400).json({ message: "Trenutna lozinka nije ispravna." });
+    }
+
+    user.password = await bcrypt.hash(novaLozinka, 10);
+    await user.save();
+
+    res.json({ message: "Lozinka je uspjesno promijenjena." });
   })
 );
 

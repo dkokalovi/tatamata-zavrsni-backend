@@ -4,7 +4,7 @@ import Analysis from "../models/Analysis.js";
 import auth, { requireAdmin } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import validate from "../middleware/validate.js";
-import { createInterestValidation } from "../validators/interestValidators.js";
+import { createInterestValidation, rateInterestValidation } from "../validators/interestValidators.js";
 
 const router = express.Router();
 
@@ -61,6 +61,26 @@ router.patch(
       { new: true, runValidators: true }
     );
     if (!interest) return res.status(404).json({ message: "Interes ne postoji." });
+
+    res.json(interest);
+  })
+);
+
+router.patch(
+  "/:id/ocjena",
+  auth,
+  rateInterestValidation,
+  validate,
+  asyncHandler(async (req, res) => {
+    const interest = await Interest.findById(req.params.id);
+    if (!interest) return res.status(404).json({ message: "Interes ne postoji." });
+    if (interest.user.toString() !== req.userId) {
+      return res.status(403).json({ message: "Ovaj interes ne pripada vama." });
+    }
+
+    interest.ocjena = req.body.ocjena;
+    interest.komentar = req.body.komentar || "";
+    await interest.save();
 
     res.json(interest);
   })

@@ -6,6 +6,8 @@ const interestSchema = new mongoose.Schema(
     company: { type: mongoose.Schema.Types.ObjectId, ref: "Company", required: true },
     analysis: { type: mongoose.Schema.Types.ObjectId, ref: "Analysis", required: true },
     status: { type: String, enum: ["na_cekanju", "kontaktirano", "zavrseno"], default: "na_cekanju" },
+    ocjena: { type: Number, min: 1, max: 5 },
+    komentar: { type: String, trim: true, maxlength: 500 },
   },
   { timestamps: true }
 );
