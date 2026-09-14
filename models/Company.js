@@ -1,19 +1,8 @@
 import mongoose from "mongoose";
 
-// Fiksni popis kategorija problema - AI analiza vraca jednu od ovih kategorija,
-// a firme se oglasavaju za jednu ili vise kategorija u kojima rade.
 export const KATEGORIJE = [
-  "vlaga_i_fleke",
-  "pukotine",
-  "krov",
-  "vodoinstalacije",
-  "elektroinstalacije",
-  "fasada",
-  "podovi_i_zidne_obloge",
-  "izolacija",
-  "plijesan",
-  "stolarija",
-  "ostalo",
+  "vlaga_i_fleke", "pukotine", "krov", "vodoinstalacije", "elektroinstalacije",
+  "fasada", "podovi_i_zidne_obloge", "izolacija", "plijesan", "stolarija", "ostalo",
 ];
 
 const companySchema = new mongoose.Schema(
@@ -29,6 +18,9 @@ const companySchema = new mongoose.Schema(
       required: true,
       validate: (arr) => arr.length > 0,
     },
+    // Ako je firma nastala samostalnom registracijom obrtnika (ne dodana od admina),
+    // ovo polje povezuje firmu s korisnikom koji ju je kreirao.
+    vlasnik: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
 );

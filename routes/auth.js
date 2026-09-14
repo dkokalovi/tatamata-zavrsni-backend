@@ -2,6 +2,7 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import Company from "../models/Company.js";
 import auth from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import validate from "../middleware/validate.js";
@@ -31,7 +32,10 @@ router.post(
   registerValidation,
   validate,
   asyncHandler(async (req, res) => {
-    const { ime, prezime, email, password, telefon, adresa } = req.body;
+    const {
+      ime, prezime, email, password, telefon, adresa,
+      postajeObrtnik, companyNaziv, companyTelefon, companyGrad, companyKategorije,
+    } = req.body;
 
     const existing = await User.findOne({ email: email.toLowerCase() });
     if (existing) {
@@ -39,11 +43,26 @@ router.post(
     }
 
     const hashed = await bcrypt.hash(password, 10);
+    // Uloga "admin" se ne moze postaviti kroz registraciju. "contractor" MOZE, jer
+    // ne nosi nikakve dodatne ovlasti u sustavu (isti pristup kao "client") - samo
+    // oznacava da korisnik uz sebe ima i vlastiti Company zapis.
+    const role = postajeObrtnik ? "contractor" : "client";
     const user = await User.create({
       ime, prezime, email, telefon, adresa,
       password: hashed,
-      role: "client",
+      role,
     });
+
+    if (postajeObrtnik) {
+      await Company.create({
+        naziv: companyNaziv,
+        telefon: companyTelefon,
+        email,
+        grad: companyGrad || "",
+        kategorije: companyKategorije,
+        vlasnik: user._id,
+      });
+    }
 
     res.status(201).json({ token: makeToken(user), user: publicUser(user) });
   })

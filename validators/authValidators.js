@@ -25,6 +25,24 @@ export const registerValidation = [
     .optional({ values: "falsy" })
     .trim()
     .isLength({ max: 200 }).withMessage("Adresa je predugacka."),
+  body("postajeObrtnik")
+    .optional()
+    .isBoolean().withMessage("Neispravna vrijednost."),
+  // Sljedeca polja su obavezna SAMO ako je postajeObrtnik = true
+  body("companyNaziv").custom((value, { req }) => {
+    if (req.body.postajeObrtnik && !value) throw new Error("Naziv obrta je obavezan.");
+    return true;
+  }),
+  body("companyTelefon").custom((value, { req }) => {
+    if (req.body.postajeObrtnik && !value) throw new Error("Telefon obrta je obavezan.");
+    return true;
+  }),
+  body("companyKategorije").custom((value, { req }) => {
+    if (req.body.postajeObrtnik && (!Array.isArray(value) || value.length === 0)) {
+      throw new Error("Odaberi barem jednu kategoriju za obrt.");
+    }
+    return true;
+  }),
 ];
 
 export const loginValidation = [

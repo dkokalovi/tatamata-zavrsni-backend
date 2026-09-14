@@ -7,17 +7,27 @@ import { createCompanyValidation, companyIdValidation } from "../validators/comp
 
 const router = express.Router();
 
-// Javan popis firmi (npr. za pregled u aplikaciji)
+// Javan popis firmi, s brojem izrazenih interesa po firmi (za admin prikaz).
 router.get(
   "/",
   asyncHandler(async (req, res) => {
-    const companies = await Company.find().sort({ naziv: 1 });
+    const companies = await Company.aggregate([
+      { $sort: { naziv: 1 } },
+      {
+        $lookup: {
+          from: "interests",
+          localField: "_id",
+          foreignField: "company",
+          as: "interesi",
+        },
+      },
+      { $addFields: { brojInteresa: { $size: "$interesi" } } },
+      { $project: { interesi: 0 } },
+    ]);
     res.json(companies);
   })
 );
 
-// Dodavanje firme - samo admin (za sada; kontraktori se ne registriraju sami,
-// to je namjerno pojednostavljeno za potrebe ovog projekta)
 router.post(
   "/",
   auth,
