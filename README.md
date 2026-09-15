@@ -1,10 +1,19 @@
-# TataMata - Backend (API)
+# RAZVOJ MOBILNE APLIKACIJE ZA PREPOZNAVANJE GRAĐEVINSKIH PROBLEMA PRIMJENOM UMJETNE INTELIGENCIJE - BACKEND
+
+Završni rad
+Autor: David Kokalović
+Mentor: izv. prof. dr. sc. Nikola Tanković
+
+Sveučilište Jurja Dobrile u Puli, Fakultet informatike
 
 Backend za TataMata aplikaciju - Express API koji prima fotografiju građevinskog problema,
 šalje je na AI analizu (Anthropic Claude, vision), sprema rezultat u MongoDB i preporučuje
 građevinske obrte prema prepoznatoj kategoriji problema.
 
-Frontend za ovaj backend je odvojen repozitorij: **tatamata-frontend** (Vue 3 + Vite).
+Frontend za ovaj backend je odvojen repozitorij: [tatamata-zavrsni-frontend](https://github.com/dkokalovi/tatamata-zavrsni-frontend) (Vue 3 + Vite).
+
+Web aplikacija (produkcija): https://tatamata-zavrsni-frontend.netlify.app
+Dokumentacija: [priložena dokumentacija završnog rada](https://github.com/dkokalovi/tatamata-zavrsni-frontend/blob/main/docs/zavrsni-rad.pdf)
 
 ## Tehnologije
 
@@ -51,21 +60,18 @@ npm run dev
 API je dostupan na `http://localhost:<PORT>`.
 
 ## Struktura
-
-```
-├── index.js               # ulazna tocka - Express app, CORS, mongoose konekcija
+├── index.js # ulazna tocka - Express app, CORS, mongoose konekcija
 ├── middleware/
-│   ├── auth.js             # provjera JWT tokena + requireAdmin
-│   ├── asyncHandler.js      # omata async rute, hvata greske automatski
-│   ├── validate.js          # cita rezultat express-validator provjera
-│   └── errorHandler.js      # centralizirani error handler + 404
-├── validators/              # express-validator lanci po resursu
-├── models/                  # Mongoose sheme (User, Company, Analysis, Interest)
-├── routes/                  # API rute (auth, analysis, companies, interest, admin, uploads)
-├── services/aiAnalysis.js   # poziv Claude vision API-ja
-├── seed.js                  # skripta za pocetne test-firme
-└── createAdmin.js           # skripta za kreiranje admin korisnika
-```
+│ ├── auth.js # provjera JWT tokena + requireAdmin
+│ ├── asyncHandler.js # omata async rute, hvata greske automatski
+│ ├── validate.js # cita rezultat express-validator provjera
+│ └── errorHandler.js # centralizirani error handler + 404
+├── validators/ # express-validator lanci po resursu
+├── models/ # Mongoose sheme (User, Company, Analysis, Interest)
+├── routes/ # API rute (auth, analysis, companies, interest, admin, uploads)
+├── services/aiAnalysis.js # poziv Claude vision API-ja
+├── seed.js # skripta za pocetne test-firme
+└── createAdmin.js # skripta za kreiranje admin korisnika
 
 ## API rute
 
