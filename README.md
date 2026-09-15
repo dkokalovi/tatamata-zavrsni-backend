@@ -1,10 +1,11 @@
 # RAZVOJ MOBILNE APLIKACIJE ZA PREPOZNAVANJE GRAĐEVINSKIH PROBLEMA PRIMJENOM UMJETNE INTELIGENCIJE - BACKEND
 
-Završni rad
-Autor: David Kokalović
-Mentor: izv. prof. dr. sc. Nikola Tanković
-
+**Završni rad**<br>
+Autor: David Kokalović<br>
+Mentor: izv. prof. dr. sc. Nikola Tanković<br>
 Sveučilište Jurja Dobrile u Puli, Fakultet informatike
+
+---
 
 Backend za TataMata aplikaciju - Express API koji prima fotografiju građevinskog problema,
 šalje je na AI analizu (Anthropic Claude, vision), sprema rezultat u MongoDB i preporučuje
@@ -12,8 +13,8 @@ građevinske obrte prema prepoznatoj kategoriji problema.
 
 Frontend za ovaj backend je odvojen repozitorij: [tatamata-zavrsni-frontend](https://github.com/dkokalovi/tatamata-zavrsni-frontend) (Vue 3 + Vite).
 
-Web aplikacija (produkcija): https://tatamata-zavrsni-frontend.netlify.app
-Dokumentacija: [priložena dokumentacija završnog rada](https://github.com/dkokalovi/tatamata-zavrsni-frontend/blob/main/docs/zavrsni-rad.pdf)
+**Web aplikacija (produkcija):** https://tatamata-zavrsni-frontend.netlify.app<br>
+**Dokumentacija:** [priložena dokumentacija završnog rada](https://github.com/dkokalovi/tatamata-zavrsni-frontend/blob/main/docs/zavrsni-rad.pdf)
 
 ## Tehnologije
 
